@@ -1,0 +1,147 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} { 
+      allow read, write: if false; 
+    }
+
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['xp', 'level', 'dailyStreak', 'totalStudyTime', 'pomodorosCompleted', 'email'])
+          && data.xp is number
+          && data.level is number
+          && data.dailyStreak is number
+          && data.totalStudyTime is number
+          && data.pomodorosCompleted is number
+          && data.email is string
+          && data.email.size() <= 200;
+    }
+
+    function isValidTask(data) {
+      return data.keys().hasAll(['userId', 'title', 'description', 'subject', 'xpReward', 'progress', 'isCompleted', 'createdAt'])
+          && data.userId is string
+          && data.userId.size() <= 128
+          && data.title is string
+          && data.title.size() <= 100
+          && data.description is string
+          && data.description.size() <= 500
+          && data.subject is string
+          && data.subject.size() <= 100
+          && data.xpReward is number
+          && data.progress is number
+          && data.isCompleted is bool
+          && data.createdAt is number;
+    }
+
+    function isValidSubjectProgress(data) {
+      return data.keys().hasAll(['userId', 'category', 'subject', 'progress'])
+          && data.userId is string
+          && data.userId.size() <= 128
+          && data.category is string
+          && data.category.size() <= 50
+          && data.subject is string
+          && data.subject.size() <= 100
+          && data.progress is number;
+    }
+
+    function isValidSubjectContent(data) {
+      return data.keys().hasAll(['category', 'subject', 'markdownContent', 'createdAt'])
+          && data.category is string
+          && data.category.size() <= 50
+          && data.subject is string
+          && data.subject.size() <= 100
+          && data.markdownContent is string
+          && data.markdownContent.size() <= 100000
+          && data.createdAt is number;
+    }
+
+    match /subjectContents/{contentId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      
+      allow create: if isSignedIn()
+          && isValidId(contentId)
+          && isValidSubjectContent(incoming())
+          && incoming().keys().size() == 4;
+          
+      allow update: if isSignedIn()
+          && isValidId(contentId)
+          && isValidSubjectContent(incoming())
+          && incoming().diff(existing()).affectedKeys().hasOnly(['markdownContent']);
+          
+      allow delete: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow list: if false; // Users cannot list all other users
+      
+      allow create: if isSignedIn() 
+          && request.auth.uid == userId 
+          && isValidId(userId)
+          && isValidUser(incoming())
+          && incoming().keys().size() == 6; // xp, level, dailyStreak, totalStudyTime, pomodorosCompleted, email
+          
+      allow update: if isSignedIn() 
+          && request.auth.uid == userId
+          && isValidId(userId)
+          && isValidUser(incoming())
+          && incoming().diff(existing()).affectedKeys().hasOnly(['xp', 'level', 'dailyStreak', 'totalStudyTime', 'pomodorosCompleted', 'email']);
+          
+      allow delete: if false; // Users cannot delete their profile via client SDK
+      
+      match /tasks/{taskId} {
+        allow get: if isSignedIn() && request.auth.uid == userId;
+        allow list: if isSignedIn() && request.auth.uid == userId && resource.data.userId == request.auth.uid;
+        
+        allow create: if isSignedIn()
+            && request.auth.uid == userId
+            && isValidId(userId)
+            && isValidId(taskId)
+            && isValidTask(incoming())
+            && incoming().userId == userId
+            && incoming().keys().size() == 8;
+            
+        allow update: if isSignedIn()
+            && request.auth.uid == userId
+            && isValidId(userId)
+            && isValidId(taskId)
+            && isValidTask(incoming())
+            && incoming().userId == existing().userId
+            && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'subject', 'xpReward', 'progress', 'isCompleted']);
+            
+        allow delete: if isSignedIn()
+            && request.auth.uid == userId;
+      }
+      
+      match /subjectProgress/{progressId} {
+        allow get: if isSignedIn() && request.auth.uid == userId;
+        allow list: if isSignedIn() && request.auth.uid == userId && resource.data.userId == request.auth.uid;
+        
+        allow create: if isSignedIn()
+            && request.auth.uid == userId
+            && isValidId(userId)
+            && isValidId(progressId)
+            && isValidSubjectProgress(incoming())
+            && incoming().userId == userId
+            && incoming().keys().size() == 4;
+            
+        allow update: if isSignedIn()
+            && request.auth.uid == userId
+            && isValidId(userId)
+            && isValidId(progressId)
+            && isValidSubjectProgress(incoming())
+            && incoming().userId == existing().userId
+            && incoming().diff(existing()).affectedKeys().hasOnly(['progress']);
+            
+        allow delete: if false; // Subject progresses shouldn't be deleted via client commonly
+      }
+    }
+  }
+}

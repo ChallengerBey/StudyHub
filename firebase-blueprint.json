@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and statistics",
+      "type": "object",
+      "properties": {
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "dailyStreak": { "type": "number" },
+        "totalStudyTime": { "type": "number" },
+        "pomodorosCompleted": { "type": "number" },
+        "email": { "type": "string" }
+      },
+      "required": ["xp", "level", "dailyStreak", "totalStudyTime", "pomodorosCompleted", "email"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A user's task",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "subject": { "type": "string" },
+        "xpReward": { "type": "number" },
+        "progress": { "type": "number" },
+        "isCompleted": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["userId", "title", "description", "subject", "xpReward", "progress", "isCompleted", "createdAt"]
+    },
+    "SubjectProgress": {
+       "title": "Subject Progress",
+       "description": "User's progress on a given subject",
+       "type": "object",
+       "properties": {
+          "userId": { "type": "string" },
+          "category": { "type": "string" },
+          "subject": { "type": "string" },
+          "progress": { "type": "number" }
+       },
+       "required": ["userId", "category", "subject", "progress"]
+    },
+    "SubjectContent": {
+       "title": "Subject Content",
+       "description": "AI generated subject content",
+       "type": "object",
+       "properties": {
+          "category": { "type": "string" },
+          "subject": { "type": "string" },
+          "markdownContent": { "type": "string" },
+          "createdAt": { "type": "number" }
+       },
+       "required": ["category", "subject", "markdownContent", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/subjectContents/{contentId}": {
+      "schema": { "$ref": "#/entities/SubjectContent" },
+      "description": "Shared generated subject content that all users can read."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profile with level, xp, streak, etc."
+    },
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/Task" },
+      "description": "Tasks belonging to a specific user"
+    },
+    "/users/{userId}/subjectProgress/{progressId}": {
+      "schema": { "$ref": "#/entities/SubjectProgress" },
+      "description": "A user's progress on specific subjects"
+    }
+  }
+}
