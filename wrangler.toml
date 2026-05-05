@@ -1,12 +1,6 @@
 name = "studyhub"
 compatibility_date = "2026-05-05"
-compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".next"
 
 [observability]
 enabled = true
-
-# Static assets
-[[rules]]
-type = "Text"
-globs = ["**/*"]
-fallthrough = true

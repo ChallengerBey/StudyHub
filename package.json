@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "clean": "next clean",
-    "deploy": "wrangler deploy",
-    "preview": "wrangler dev"
+    "deploy": "wrangler pages deploy .next --project-name=studyhub",
+    "preview": "wrangler pages dev .next --project-name=studyhub"
   },
   "dependencies": {
     "@google/genai": "^1.51.0",
