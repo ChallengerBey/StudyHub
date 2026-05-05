@@ -1,0 +1,12 @@
+name = "studyhub"
+compatibility_date = "2026-05-05"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+# Static assets
+[[rules]]
+type = "Text"
+globs = ["**/*"]
+fallthrough = true
