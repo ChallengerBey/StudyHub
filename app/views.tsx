@@ -224,7 +224,7 @@ export const AiAssistantView = () => (
             <Bot className="w-5 h-5 text-emerald-500" />
           </div>
           <div className="bg-[#1e1e20] rounded-[18px] rounded-tl-sm p-4 text-[14px] text-zinc-300 leading-relaxed shadow-sm">
-            Merhaba Semih! Bugün hangi konuda yardıma ihtiyacın var? Çözemediğin bir soru veya anlamadığın bir konu varsa bana sorabilirsin.
+            Merhaba ! Bugün hangi konuda yardıma ihtiyacın var? Çözemediğin bir soru veya anlamadığın bir konu varsa bana sorabilirsin.
           </div>
         </div>
 
@@ -757,7 +757,7 @@ export const LeaderboardView = () => (
       
       <div className="flex flex-col">
         {[
-          { name: 'Semih Ergili', xp: 4320, level: 12, isCurrent: true },
+          { name: ' Ergili', xp: 4320, level: 12, isCurrent: true },
           { name: 'Ayşe Yılmaz', xp: 3850, level: 11, isCurrent: false },
           { name: 'Mehmet Demir', xp: 3500, level: 10, isCurrent: false },
           { name: 'Zeynep Kaya', xp: 3200, level: 10, isCurrent: false },
